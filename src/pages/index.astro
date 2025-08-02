@@ -1,25 +1,19 @@
 ---
-// File: src/pages/index.astro
-// Halaman utama untuk antarmuka asisten AI Gemini dengan tampilan ala anime.
 import Layout from '../layouts/Layout.astro';
 ---
-<Layout pageTitle="Elysia AI">
-  <!-- Menggunakan class DaisyUI: card, card-body, chat-bubble, input, dan btn -->
+<Layout pageTitle="AI Elysia">
   <div class="card bg-base-100 shadow-xl w-full max-w-screen-md mx-4 md:mx-auto my-8 flex flex-col h-[80vh] overflow-hidden">
     <div class="card-body p-6 md:p-8">
-      <h1 class="card-title text-3xl font-bold text-center mb-6">Asisten AI Gemini</h1>
+      <h1 class="card-title text-3xl font-bold text-center mb-6">AI Elysia</h1>
       
-      <!-- Area untuk menampilkan pesan dari AI -->
       <div id="chat-output" class="flex-grow overflow-y-auto mb-4 p-4 space-y-4">
-        <!-- Pesan awal dari AI -->
         <div class="chat chat-start">
           <div class="chat-bubble chat-bubble-primary text-base-100">
-            Halo! Saya asisten AI Gemini. <br/>Silakan ajukan pertanyaan.
+            Hai! Aku Elysia, asisten AI usia 20-an yang siap bantu kamu. Yuk, kita ngobrol santai aja! Ada yang bisa kubantu?
           </div>
         </div>
       </div>
       
-      <!-- Form untuk input pengguna -->
       <form id="chat-form" class="flex items-center gap-2 mt-auto">
         <input 
           id="user-input" 
@@ -35,6 +29,80 @@ import Layout from '../layouts/Layout.astro';
         </button>
       </form>
     </div>
+  </div>
+</Layout>
+
+<script>
+  const chatForm = document.getElementById('chat-form');
+  const userInput = document.getElementById('user-input');
+  const chatOutput = document.getElementById('chat-output');
+  const converter = new showdown.Converter();
+
+  chatForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const userMessage = userInput.value.trim();
+    if (!userMessage) return;
+
+    appendMessage(userMessage, 'user');
+    userInput.value = '';
+
+    const loadingMessage = appendMessage('...', 'ai', true);
+    chatOutput.scrollTop = chatOutput.scrollHeight;
+
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: userMessage })
+      });
+
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+
+      const data = await response.json();
+      loadingMessage.remove();
+
+      if (data.error) {
+        appendMessage(`Error: ${data.error}`, 'ai');
+      } else {
+        appendMessage(data.text, 'ai');
+      }
+
+    } catch (error) {
+      console.error('Error:', error);
+      loadingMessage.remove();
+      appendMessage('Maaf, terjadi kesalahan.', 'ai');
+    }
+    
+    chatOutput.scrollTop = chatOutput.scrollHeight;
+  });
+
+  function appendMessage(text, sender, isLoading = false) {
+    const chatContainer = document.createElement('div');
+    chatContainer.classList.add('chat', sender === 'user' ? 'chat-end' : 'chat-start');
+
+    const chatBubble = document.createElement('div');
+    const bubbleClasses = sender === 'user' 
+      ? 'chat-bubble chat-bubble-accent' 
+      : 'chat-bubble chat-bubble-primary';
+    
+    chatBubble.classList.add(bubbleClasses);
+    
+    if (isLoading) {
+      chatBubble.innerText = text;
+      chatBubble.classList.add('animate-pulse');
+    } else {
+      chatBubble.innerHTML = converter.makeHtml(text);
+    }
+
+    chatContainer.appendChild(chatBubble);
+    chatOutput.appendChild(chatContainer);
+    
+    return chatContainer;
+  }
+</script>    </div>
   </div>
 </Layout>
 
