@@ -12,13 +12,14 @@ export async function POST({ request }) {
     // Ambil API key dari Environment Variables
     const apiKey = import.meta.env.GEMINI_API_KEY;
 
+    // Periksa apakah API key terkonfigurasi
     if (!apiKey) {
+      console.error("GEMINI_API_KEY is not set in Vercel Environment Variables.");
       return new Response(JSON.stringify({ error: "API key is not configured." }), { status: 500 });
     }
 
     // Konfigurasi Gemini API
-    let chatHistory = [];
-    chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+    const chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
     const payload = { contents: chatHistory };
     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
 
@@ -30,11 +31,13 @@ export async function POST({ request }) {
     });
 
     if (!response.ok) {
-      throw new Error(`API Error: ${response.statusText}`);
+      const errorText = await response.text();
+      console.error(`API Error: ${response.statusText}, Details: ${errorText}`);
+      return new Response(JSON.stringify({ error: `API Error: ${response.statusText}` }), { status: response.status });
     }
 
     const result = await response.json();
-    
+
     if (result.candidates && result.candidates.length > 0 &&
         result.candidates[0].content && result.candidates[0].content.parts &&
         result.candidates[0].content.parts.length > 0) {
@@ -47,11 +50,12 @@ export async function POST({ request }) {
         }
       });
     } else {
-      throw new Error('Invalid response structure from Gemini API.');
+      console.error('Invalid response structure from Gemini API:', JSON.stringify(result));
+      return new Response(JSON.stringify({ error: 'Invalid response structure from Gemini API.' }), { status: 500 });
     }
 
   } catch (error) {
-    console.error('Error in API route:', error);
-    return new Response(JSON.stringify({ error: `Terjadi kesalahan saat memproses permintaan: ${error.message}` }), { status: 500 });
+    console.error('Fatal error in API route:', error);
+    return new Response(JSON.stringify({ error: `Terjadi kesalahan fatal saat memproses permintaan: ${error.message}` }), { status: 500 });
   }
 }
