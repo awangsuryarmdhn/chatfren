@@ -1,0 +1,48 @@
+---
+// File: src/layouts/Layout.astro
+// Layout utama dengan CDN DaisyUI, Showdown.js, navbar, dan footer.
+const { pageTitle } = Astro.props;
+---
+<!DOCTYPE html>
+<!-- Mengatur tema DaisyUI di sini -->
+<html lang="id" class="h-full" data-theme="synthwave">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{pageTitle} | Asisten AI Gemini</title>
+
+  <!-- CDN gabungan untuk Tailwind CSS dan DaisyUI -->
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.2/dist/full.min.css" rel="stylesheet" type="text/css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- CDN untuk pustaka Showdown.js (digunakan untuk mengonversi Markdown ke HTML) -->
+  <script src="https://cdn.jsdelivr.net/npm/showdown@2.1.0/dist/showdown.min.js"></script>
+</head>
+<body class="h-full flex flex-col">
+  <!-- Navbar Responsif -->
+  <div class="navbar bg-base-100 shadow-md">
+    <div class="container mx-auto px-4">
+      <div class="flex-1">
+        <a class="btn btn-ghost text-xl text-primary font-bold">Gemini AI</a>
+      </div>
+      <div class="flex-none">
+        <ul class="menu menu-horizontal px-1">
+          <li><a>Beranda</a></li>
+          <li><a>Tentang</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <main class="flex-grow flex items-center justify-center">
+    <!-- Slot untuk menampung konten dari setiap halaman -->
+    <slot />
+  </main>
+
+  <!-- Footer Responsif -->
+  <footer class="footer footer-center p-4 bg-base-100 text-base-content shadow-inner">
+    <aside>
+      <p>Hak Cipta © 2024 - Asisten AI Gemini</p>
+    </aside>
+  </footer>
+</body>
+</html>
