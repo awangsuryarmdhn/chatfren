@@ -58,14 +58,20 @@ import Layout from '../layouts/Layout.astro';
       });
 
       if (!response.ok) {
-        throw new Error('Network response was not ok');
+        // Handle error jaringan di sini
+        throw new Error('Terjadi masalah dengan koneksi. Periksa koneksi internet Anda dan coba lagi.');
       }
 
       const data = await response.json();
       loadingMessage.remove();
 
       if (data.error) {
-        appendMessage(`Error: ${data.error}`, 'ai');
+        // Tangani pesan error spesifik dari API
+        let errorMessage = data.error;
+        if (errorMessage.includes('API key is not configured')) {
+          errorMessage = 'Ups! Sepertinya ada masalah dengan kunci API. Pastikan Anda sudah menambahkannya di pengaturan Vercel.';
+        }
+        appendMessage(`Error: ${errorMessage}`, 'ai');
       } else {
         appendMessage(data.text, 'ai');
       }
@@ -73,7 +79,8 @@ import Layout from '../layouts/Layout.astro';
     } catch (error) {
       console.error('Error:', error);
       loadingMessage.remove();
-      appendMessage('Maaf, terjadi kesalahan.', 'ai');
+      // Tampilkan pesan error dari throw Error di atas atau pesan default
+      appendMessage(error.message || 'Maaf, terjadi kesalahan.', 'ai');
     }
     
     chatOutput.scrollTop = chatOutput.scrollHeight;
@@ -90,89 +97,6 @@ import Layout from '../layouts/Layout.astro';
     
     chatBubble.classList.add(bubbleClasses);
     
-    if (isLoading) {
-      chatBubble.innerText = text;
-      chatBubble.classList.add('animate-pulse');
-    } else {
-      chatBubble.innerHTML = converter.makeHtml(text);
-    }
-
-    chatContainer.appendChild(chatBubble);
-    chatOutput.appendChild(chatContainer);
-    
-    return chatContainer;
-  }
-</script>    </div>
-  </div>
-</Layout>
-
-<script>
-  // Dapatkan elemen-elemen DOM yang diperlukan
-  const chatForm = document.getElementById('chat-form');
-  const userInput = document.getElementById('user-input');
-  const chatOutput = document.getElementById('chat-output');
-  // Buat instance dari Showdown.js untuk mengonversi Markdown
-  const converter = new showdown.Converter();
-
-  // Tambahkan listener untuk form submit
-  chatForm.addEventListener('submit', async (e) => {
-    e.preventDefault(); // Mencegah halaman reload
-
-    const userMessage = userInput.value.trim();
-    if (!userMessage) return; // Jangan kirim pesan kosong
-
-    // Tampilkan pesan pengguna di UI
-    appendMessage(userMessage, 'user');
-    userInput.value = ''; // Kosongkan input field
-
-    // Tampilkan indikator loading
-    const loadingMessage = appendMessage('...', 'ai', true);
-    chatOutput.scrollTop = chatOutput.scrollHeight; // Scroll ke bawah
-
-    try {
-      // Panggilan API ke endpoint Astro yang baru dibuat
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: userMessage })
-      });
-
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-
-      const data = await response.json();
-      loadingMessage.remove();
-
-      if (data.error) {
-        appendMessage(`Error: ${data.error}`, 'ai');
-      } else {
-        // Tampilkan respons AI dengan konversi Markdown
-        appendMessage(data.text, 'ai');
-      }
-
-    } catch (error) {
-      console.error('Error:', error);
-      loadingMessage.remove();
-      appendMessage('Maaf, terjadi kesalahan.', 'ai');
-    }
-    
-    chatOutput.scrollTop = chatOutput.scrollHeight;
-  });
-
-  // Fungsi untuk menampilkan pesan di chat
-  function appendMessage(text, sender, isLoading = false) {
-    const chatContainer = document.createElement('div');
-    chatContainer.classList.add('chat', sender === 'user' ? 'chat-end' : 'chat-start');
-
-    const chatBubble = document.createElement('div');
-    const bubbleClasses = sender === 'user' 
-      ? 'chat-bubble chat-bubble-accent' 
-      : 'chat-bubble chat-bubble-primary';
-    
-    chatBubble.classList.add(bubbleClasses);
-    
-    // Gunakan innerHTML untuk menampilkan konten Markdown yang sudah diubah ke HTML
     if (isLoading) {
       chatBubble.innerText = text;
       chatBubble.classList.add('animate-pulse');
