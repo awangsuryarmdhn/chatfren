@@ -1,0 +1,30 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background-color: #F8F8F8;
+  --text-color: #333333;
+  --primary-color: #F687B3;
+  --secondary-color: #F5BB50;
+}
+
+[data-theme="valentine"] {
+  --primary: #F687B3;
+  --secondary: #F5BB50;
+  --accent: #E587B3;
+  --neutral: #333333;
+  --base-100: #FFFFFF;
+  --info: #3B82F6;
+  --success: #22C55E;
+  --warning: #FBBF24;
+  --error: #EF4444;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-image: url('https://placehold.co/1920x1080/ffe4e6/881616?text=Elysia\'s+Cafe');
+  background-size: cover;
+  background-position: center;
+  color: var(--text-color);
+}
